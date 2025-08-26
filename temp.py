@@ -1,39 +1,11 @@
 from pyserini.analysis import Analyzer, get_lucene_analyzer
-import re
+import json
 
-lucene_analyzer_for_stemming = get_lucene_analyzer(stemmer='porter')
-stemmer_analyzer = Analyzer(lucene_analyzer_for_stemming)
+lucene_analyzer = get_lucene_analyzer()
+analyzer = Analyzer(lucene_analyzer)
 
-# list stopwords
-stopwords = {"a", "an", "and", "are", "as", "at", "be", "but", "by", "for",
-             "if", "in", "into", "is", "it", "no", "not", "of", "on", "or",
-             "such", "that", "the", "their", "then", "there", "these",
-             "they", "this", "to", "was", "will", "with"}
-
-def preprocess_document(document_text):
-    # 1. lowercase
-    text = document_text.lower()
-
-    # 2. remove punctuation and extra whitespace
-    text = re.sub(r'[^\w\s]', ' ', text) 
-    text = re.sub(r'\s+', ' ', text).strip() 
-
-    # tokenize
-    tokens = text.split()
-
-    # 3. remove stopwords
-    filtered_tokens = [word for word in tokens if word not in stopwords]
-
-    # 4. stemming using Pyserini's Porter stemmer
-    stemmed_tokens = []
-    for token in filtered_tokens:
-        analyzed_result = stemmer_analyzer.analyze(token)
-        if analyzed_result:
-            stemmed_tokens.append(analyzed_result[0])
-        else:
-            stemmed_tokens.append(token)
-
-    return " ".join(stemmed_tokens)
+def preprocess_document(document):
+    return " ".join(analyzer.analyze(document))
 
 docs = [
   ("d1",  "The cat chased a small mouse into the garden."),
@@ -58,6 +30,11 @@ for doc_id, doc_text in docs:
     preprocessed_doc = preprocess_document(doc_text)
     preprocessed_documents.append({"id": doc_id, "contents": preprocessed_doc})
 
-print("Preprocessed Documents:")
 for doc in preprocessed_documents:
     print(doc)
+
+output_file = 'corpus/docs.jsonl'
+with open(output_file, 'w', encoding='utf-8') as f:
+    for doc in preprocessed_documents:
+        json.dump(doc, f, ensure_ascii=False)
+        f.write('\n')

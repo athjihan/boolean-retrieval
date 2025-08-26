@@ -1,21 +1,14 @@
 import os
 import subprocess
 
-# Define the path to the corpus and the index directory
+# define the path to the corpus (input documents) and the index directory (output)
 corpus_path = 'corpus'
 index_path = 'indexes/lucene-index-boolean-retrieval'
 
-# Ensure the index directory exists
+# create the index directory if it doesn't exist
 os.makedirs(index_path, exist_ok=True)
 
-# Command to index the corpus using Pyserini's Anserini indexer
-# We need to specify the collection, input path, index path, and other options.
-# Pyserini's `index` command is a wrapper around Anserini's indexing capabilities.
-# The command structure is typically:
-# python -m pyserini.index -collection JsonCollection -generator Default
-# -threads 1 -input <corpus_path> -index <index_path>
-# -storePositions -storeDocvectors -storeRaw -stemmer porter
-
+# command to index JSON documents from the corpus_path into a Lucene index and applying Porter stemming
 command = [
     "python", "-m", "pyserini.index.lucene",
     "-collection", "JsonCollection",
@@ -34,7 +27,7 @@ print(f"Index will be stored at: {index_path}")
 print(f"Executing command: {' '.join(command)}")
 
 try:
-    # Execute the command
+    # execute the indexing command
     result = subprocess.run(command, check=True, capture_output=True, text=True)
     print("Indexing completed successfully!")
     print("STDOUT:")
@@ -42,6 +35,8 @@ try:
     if result.stderr:
         print("STDERR:")
         print(result.stderr)
+
+# handle errors that occur during the command execution
 except subprocess.CalledProcessError as e:
     print(f"Error during indexing: {e}")
     print("STDOUT:")
