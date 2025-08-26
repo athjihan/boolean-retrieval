@@ -56,17 +56,20 @@ def preprocess_document(document_text):
     return " ".join(stemmed_tokens)
 
 preprocessed_documents = []
+
+print("Preprocessing documents...")
 for doc_id, doc_text in docs:
     preprocessed_doc = preprocess_document(doc_text)
     preprocessed_documents.append({"id": doc_id, "contents": preprocessed_doc})
 
-print("Preprocessed Documents:")
+print("\nPreprocessed Documents:\n")
 for doc in preprocessed_documents:
     print(doc)
 
 # save preprocessed docs to JSONL file
-output_file = 'corpus/docs.jsonl'
+output_file = "corpus/docs.jsonl"
 with open(output_file, 'w', encoding='utf-8') as f:
     for doc in preprocessed_documents:
         json.dump(doc, f, ensure_ascii=False)
         f.write('\n')
+    print(f"\n💾 Preprocessed documents saved to {output_file}")

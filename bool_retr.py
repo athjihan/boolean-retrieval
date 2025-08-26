@@ -26,15 +26,11 @@ class BooleanRetrieval:
         try:
             self.searcher = LuceneSearcher(self.index_dir)
             self.index_reader = LuceneIndexReader(self.index_dir)
-            print("✓ Boolean retrieval system initialized")
-            print(f"📁 Index: {self.index_dir}")
-            print(f"📄 Documents available: {self.index_reader.stats()['documents']}")
         except Exception as e:
             raise Exception(f"Failed to initialize searcher: {e}")
 
     # mapping words to document IDs that contain them
     def build_inverted_index(self):
-        print("Building inverted index...")
         total_docs = self.index_reader.stats()['documents']
         
         for internal_docid in range(total_docs):
@@ -63,13 +59,10 @@ class BooleanRetrieval:
                 
             except Exception as e:
                 print(f"Error processing document {internal_docid}: {e}")
-        
-        print(f"✓ Inverted index built with {len(self.inverted_index)} unique terms")
-        print(f"✓ Documents loaded: {len(self.documents)}")
-        print(f"✓ Inverted index built with {len(self.inverted_index)} unique terms")
 
     def search_boolean(self, query: str, max_results: int = 100) -> List[str]:
         try:
+            print(f"Performing boolean search for query: '{query}'")
             # clean and parse query
             query = query.strip()
             if not query:
@@ -78,8 +71,8 @@ class BooleanRetrieval:
             # parse Boolean query
             result_set = self._parse_boolean_query(query)
             
-            # convert set to sorted list
-            results = sorted(list(result_set))[:max_results]
+            # convert set to sorted list, sorting numerically by extracting the number from the docid
+            results = sorted(list(result_set), key=lambda x: int(x[1:]))[:max_results]
             return results
             
         except Exception as e:
@@ -174,8 +167,8 @@ class BooleanRetrieval:
             return self.inverted_index[stemmed_term].copy()
         return set()
     
-    def run_test_queries(self) -> List[Dict]:
-        test_queries = [
+    def run_queries(self) -> List[Dict]:
+        queries = [
             "dog AND cat",
             "dog OR cat", 
             "dog AND NOT cat",
@@ -190,7 +183,7 @@ class BooleanRetrieval:
         
         query_results = []
         
-        for i, query in enumerate(test_queries, 1):
+        for i, query in enumerate(queries, 1):
             print(f"\nQuery {i}: {query}")
             
             # perform search
@@ -206,10 +199,13 @@ class BooleanRetrieval:
         
         return query_results
 
+
 if __name__ == "__main__":
     try:
         br_system = BooleanRetrieval(index_dir="indexes/lucene-index-boolean-retrieval")
-        br_system.run_test_queries()
+        br_system.run_queries()
+        print("=" * 50)
+        print("\n📚 Boolean retrieval queries completed ✓")
     except FileNotFoundError as e:
         print(f"Error: {e}. Please ensure the index directory is correct.")
     except Exception as e:

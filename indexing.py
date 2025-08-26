@@ -1,9 +1,15 @@
 import os
 import subprocess
+import shutil
 
 # define the path to the corpus (input documents) and the index directory (output)
 corpus_path = 'corpus'
 index_path = 'indexes/lucene-index-boolean-retrieval'
+
+# remove the index directory if it exists to ensure a fresh index
+if os.path.exists(index_path):
+    print(f"Removing existing index directory: {index_path}")
+    shutil.rmtree(index_path)
 
 # create the index directory if it doesn't exist
 os.makedirs(index_path, exist_ok=True)
@@ -47,3 +53,5 @@ except FileNotFoundError:
     print("Error: 'python' command not found. Ensure Python is installed and in your PATH.")
 except Exception as e:
     print(f"An unexpected error occurred: {e}")
+    
+print("🔢 Indexing process completed ✓")
